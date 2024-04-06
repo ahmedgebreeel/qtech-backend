@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 const User = {};
 
-User.creatUser = (user, callback)=>{ 
+User.createUser = (user, callback)=>{ 
 
     pool.query("INSERT INTO users SET ?", user, (err, result)=>{
         if(err){
