@@ -8,7 +8,6 @@ User.creatUser = (user, callback)=>{
         if(err){
             return callback(err);
         }
-        console.log(result);
         return callback(null, result);
     })
 
@@ -19,8 +18,7 @@ User.getUserByEmail = (email, callback)=>{
     pool.query(`SELECT * FROM users WHERE email=?`, email, (err, result)=>{
         if(err){
             return callback(err);
-        }
-        console.log(result);    
+        }  
         return  callback(null, result[0]);
     })
 }
