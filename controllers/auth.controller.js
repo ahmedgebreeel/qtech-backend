@@ -1,8 +1,9 @@
+const User = require('../models/users.model');
 
 const loginController = async(req, res)=>{
     try {
         const {email, password} = req.body;
-        
+       
         return res.status(200).json({message: "login success"});
     } catch (error) {
         console.log("error in loginController", error);
