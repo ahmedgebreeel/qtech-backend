@@ -16,7 +16,6 @@ const registerController = async (req, res) => {
     }
 
     const { email, password } = req.body;
-
     // Check if the email already exists
     await User.getUserByEmail(email, async(err, user) => {
       if (err) {
@@ -51,11 +50,7 @@ const registerController = async (req, res) => {
                 return res.status(500).json({ message: "Internal Server Error" });
               }
               if (result) {
-                const token = generateToken(result.insertId);
-    
-                // Send the token in the response header
                 return res
-                  .header("Authorization", `Bearer ${token}`)
                   .status(201)
                   .json({ message: "Registration successful" });
               }
@@ -75,24 +70,31 @@ const loginController = async (req, res) => {
     const { email, password } = req.body;
 
     // Call getUserByEmail function and await the result
-    const user = await User.getUserByEmail(email, (err, user) => {
+     await User.getUserByEmail(email, async(err, user) => {
       if (err) {
         console.error("Error retrieving user:", err);
         return res.status(500).json({ message: "Internal Server Error" });
+      }  else if (!user) {
+        
+        return res.status(401).json({ message: "Invalid email or password" });
+      }else if(user){
+    
+          // check if the password correct
+          const isPasswordCorrect = await  bcrypt.compare(password, user.password);
+      
+          if (!isPasswordCorrect) {
+            return res.status(401).json({ message: "Invalid email or password" });
+          }
+      
+          // Generate a token with user
+          const token = generateToken(user.id);
+      
+          return res
+          .header('Authorization', `Bearer ${token}`)
+          .status(200).json({ message: "Login successful", user: {id: user.id, firstName: user.firstName, lastName: user.lastName} });
       }
     });
 
-    // check if the password correct
-    const isPasswordCorrect = password === user?.password;
-
-    if (!user || isPasswordCorrect) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // Generate a token with user
-    generateToken(user.id);
-
-    return res.status(200).json({ message: "Login successful", user });
   } catch (error) {
     console.log("error in loginController", error);
     return res.status(500).json({ message: error.message });
