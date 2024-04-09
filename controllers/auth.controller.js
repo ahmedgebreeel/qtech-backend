@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const { validateUser } = require("../validators/user.validator");
 const jwt = require("jsonwebtoken");
+const { generateAndSendOTB } = require("../utils/sendOTPByEmail");
 
 
 
@@ -25,6 +26,14 @@ const registerController = async (req, res) => {
     if (user) {
       return res.status(400).json({ message: "Email already exists" });
     }
+
+    // Generate and Send OTP via email
+
+    const otp = await generateAndSendOTB(email);
+
+    // if (!otp) {
+    //   return res.status(500).json({ message: "Internal Server Error" });
+    // }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
