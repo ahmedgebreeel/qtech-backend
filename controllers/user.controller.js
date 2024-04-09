@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const UserProfile = require('../models/userProfile.model');
+const UserSocial = require('../models/userSocial.model')
 const { validateUserProfile } = require('../validators/userProfile.validator');
 
 const editPersonalInfo = async (req, res) => {
@@ -68,4 +69,34 @@ const editPersonalInfo = async (req, res) => {
     }
 };
 
-module.exports = { editPersonalInfo };
+const editSocialMedia = async(req,res)=>{
+    try {
+        const {facebook, twitter, linkedin, instagram, github}= req.body;
+        const userId = req.userId;
+        
+        const user = await User.findByPk(userId);
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        const userSocial = await UserSocial.findOne({where:{userId}});
+        if(!userSocial){
+            await UserSocial.create({userId, facebook, twitter, linkedin, instagram, github});
+        }else{
+            userSocial.facebook = facebook;
+            userSocial.twitter = twitter;
+            userSocial.linkedin = linkedin;
+            userSocial.instagram = instagram;
+            userSocial.github = github;
+            await UserSocial.save();
+        }
+
+        return res.status(200).json({message:"Social Media updated successfully"});
+         
+    } catch (error) {
+        console.log("error in editSocialMedia",error);
+        return res.status(500).json({message:"Internal Server Error"});
+
+    }
+}
+
+module.exports = { editPersonalInfo, editSocialMedia };
