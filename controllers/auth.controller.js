@@ -94,7 +94,29 @@ const loginController = async (req, res) => {
 };
 
 
-module.exports = { loginController, registerController };
+const googleController = (req, res)=>{
+  try {
+    // console.log(req.body.response.credential);
+   const credential = jwt.decode(req.body.response.credential);
+    // console.log(credential);
+    const token = generateToken(credential.email);
+    return res
+      .header("Authorization", `Bearer ${token}`)
+      .status(200)
+      .json({
+        message: "Login successful",
+        token,
+        user: {name: credential.name },
+      })
+    
+  } catch (error) {
+    console.log("error in googleController",error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+
+module.exports = { loginController, registerController, googleController };
 
 
 
